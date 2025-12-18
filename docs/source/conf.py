@@ -36,7 +36,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx_copybutton',
-    'm2r',
+    'myst_parser',
     'sphinx.ext.autosummary',
     'sphinxcontrib.prettyspecialmethods',
     'sphinx.ext.napoleon'

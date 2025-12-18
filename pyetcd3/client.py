@@ -806,6 +806,7 @@ class MultiEndpointEtcd3Client(object):
         Example usage:
 
         .. code-block:: python
+        
             responses_iterator, cancel = etcd.watch_response('/doot/key')
             for response in responses_iterator:
                 print(response)
@@ -853,6 +854,7 @@ class MultiEndpointEtcd3Client(object):
         Example usage:
 
         .. code-block:: python
+
             events_iterator, cancel = etcd.watch('/doot/key')
             for event in events_iterator:
                 print(event)
