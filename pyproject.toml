@@ -43,3 +43,12 @@ dynamic = ["version"]
 "Homepage"          = "https://github.com/wwyoyo03/pyetcd3"
 "Docs: User Guide"  = "https://pyetcd3-docs.readthedocs.io/en/latest/"
 "Source Code"       = "https://github.com/wwyoyo03/pyetcd3"
+
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-copybutton",
+    "myst-parser",
+]
