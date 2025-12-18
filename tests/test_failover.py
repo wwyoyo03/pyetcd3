@@ -2,7 +2,7 @@ import os
 import pytest
 import mock
 
-import pyetcd
+import pyetcd3
 
 
 @pytest.mark.skipif(not os.environ.get('ETCDCTL_ENDPOINTS'),
@@ -15,10 +15,10 @@ class TestFailoverClient(object):
         endpoints = []
         for url in endpoint_urls:
             url = urlparse(url)
-            endpoints.append(pyetcd.Endpoint(host=url.hostname,
+            endpoints.append(pyetcd3.Endpoint(host=url.hostname,
                                             port=url.port,
                                             secure=False))
-        with pyetcd.MultiEndpointEtcd3Client(endpoints=endpoints,
+        with pyetcd3.MultiEndpointEtcd3Client(endpoints=endpoints,
                                             timeout=timeout,
                                             failover=True) as client:
             yield client
@@ -35,13 +35,13 @@ class TestFailoverClient(object):
     def test_endpoint_offline(self, etcd):
         original_endpoint = etcd.endpoint_in_use
         assert not original_endpoint.is_failed()
-        exception = Testpyetcd.MockedException(grpc.StatusCode.UNAVAILABLE)
+        exception = TestPyetcd3.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.MultiEndpointEtcd3Client.kvstub',
+        with mock.patch('pyetcd3.MultiEndpointEtcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
-            with pytest.raises(pyetcd.exceptions.ConnectionFailedError):
+            with pytest.raises(pyetcd3.exceptions.ConnectionFailedError):
                 etcd.get("foo")
         assert etcd.endpoint_in_use is original_endpoint
         assert etcd.endpoint_in_use.is_failed()
@@ -75,7 +75,7 @@ class TestFailoverClient(object):
                                                  Interceptor())
         with mock.patch.object(original_endpoint, "channel", failing_channel):
             iterator, cancel = etcd.watch("foo")
-            with pytest.raises(pyetcd.exceptions.ConnectionFailedError):
+            with pytest.raises(pyetcd3.exceptions.ConnectionFailedError):
                 next(iterator)
         assert etcd.endpoint_in_use is original_endpoint
         assert etcd.endpoint_in_use.is_failed()

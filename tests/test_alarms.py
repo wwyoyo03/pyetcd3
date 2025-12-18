@@ -1,12 +1,12 @@
-import pytest
-import pyetcd
+import pyetcd3
+import pyetcd3
 import grpc
-from pyetcd import etcdrpc
+from pyetcd3 import etcdrpc
 
 class TestAlarms:
-    @pytest.fixture
+    @pyetcd3.fixture
     def etcd(self):
-        etcd = pyetcd.client()
+        etcd = pyetcd3.client()
         yield etcd
         etcd.disarm_alarm()
         for m in etcd.members:

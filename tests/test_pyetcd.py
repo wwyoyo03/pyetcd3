@@ -22,11 +22,11 @@ from urllib.parse import urlparse
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-import pyetcd
-import pyetcd.etcdrpc as etcdrpc
-import pyetcd.exceptions
-import pyetcd.utils as utils
-from pyetcd.client import EtcdTokenCallCredentials
+import pyetcd3
+import pyetcd3.etcdrpc as etcdrpc
+import pyetcd3.exceptions
+import pyetcd3.utils as utils
+from pyetcd3.client import EtcdTokenCallCredentials
 
 etcd_version = os.environ.get('TEST_ETCD_VERSION', 'v3.5.5')
 def etcdctl(*args):
@@ -49,7 +49,7 @@ def _out_quorum():
         for pid in pids:
             os.kill(pid, signal.SIGCONT)
 
-class TestPyEtcd(object):
+class TestPyetcd3(object):
 
     class MockedException(grpc.RpcError):
         def __init__(self, code):
@@ -64,12 +64,12 @@ class TestPyEtcd(object):
         timeout = 5
         if endpoint:
             url = urlparse(endpoint)
-            with pyetcd.client(host=url.hostname,
+            with pyetcd3.client(host=url.hostname,
                               port=url.port,
                               timeout=timeout) as client:
                 yield client
         else:
-            with pyetcd.client() as client:
+            with pyetcd3.client() as client:
                 yield client
 
         @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
@@ -293,7 +293,7 @@ class TestPyEtcd(object):
                 next(events_iterator)
             except Exception as err:
                 error_raised = True
-                assert isinstance(err, pyetcd.exceptions.RevisionCompactedError)
+                assert isinstance(err, pyetcd3.exceptions.RevisionCompactedError)
                 compacted_revision = err.compacted_revision
 
             assert error_raised is True
@@ -340,12 +340,12 @@ class TestPyEtcd(object):
 
         events_iterator, cancel = etcd.watch('foo')
 
-        with pytest.raises(pyetcd.exceptions.ConnectionFailedError):
+        with pytest.raises(pyetcd3.exceptions.ConnectionFailedError):
             for _ in events_iterator:
                 pass
 
     def test_watch_timeout_on_establishment(self, etcd):
-        foo_etcd = pyetcd.client(timeout=3)
+        foo_etcd = pyetcd3.client(timeout=3)
 
         def slow_watch_mock(*args, **kwargs):
             time.sleep(4)
@@ -353,7 +353,7 @@ class TestPyEtcd(object):
 
         foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
-        with pytest.raises(pyetcd.exceptions.WatchTimedOut):
+        with pytest.raises(pyetcd3.exceptions.WatchTimedOut):
             foo_etcd.watch('foo')
 
     @pytest.mark.skip("Failed locally")
@@ -479,15 +479,15 @@ class TestPyEtcd(object):
     def test_sequential_watch_prefix_once(self, etcd):
         try:
             etcd.watch_prefix_once('/doot/', 1)
-        except pyetcd.exceptions.WatchTimedOut:
+        except pyetcd3.exceptions.WatchTimedOut:
             pass
         try:
             etcd.watch_prefix_once('/doot/', 1)
-        except pyetcd.exceptions.WatchTimedOut:
+        except pyetcd3.exceptions.WatchTimedOut:
             pass
         try:
             etcd.watch_prefix_once('/doot/', 1)
-        except pyetcd.exceptions.WatchTimedOut:
+        except pyetcd3.exceptions.WatchTimedOut:
             pass
 
     def test_watch_responses(self, etcd):
@@ -965,9 +965,9 @@ class TestPyEtcd(object):
             return original_transaction(*args, **kwargs)
 
         assert lock1.acquire() is True
-        with mock.patch.object(pyetcd.Etcd3Client, 'watch',
+        with mock.patch.object(pyetcd3.Etcd3Client, 'watch',
                                wraps=release_lock_before_watch):
-            with mock.patch.object(pyetcd.Etcd3Client, 'transaction',
+            with mock.patch.object(pyetcd3.Etcd3Client, 'transaction',
                                    wraps=transaction_wrapper):
                 assert lock2.acquire(timeout=5) is True
 
@@ -981,20 +981,20 @@ class TestPyEtcd(object):
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.Etcd3Client.kvstub',
+        with mock.patch('pyetcd3.Etcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
-            with pytest.raises(pyetcd.exceptions.InternalServerError):
+            with pytest.raises(pyetcd3.exceptions.InternalServerError):
                 etcd.get("foo")
 
     def test_connection_failure_exception_on_connection_failure(self, etcd):
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.Etcd3Client.kvstub',
+        with mock.patch('pyetcd3.Etcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
-            with pytest.raises(pyetcd.exceptions.ConnectionFailedError):
+            with pytest.raises(pyetcd3.exceptions.ConnectionFailedError):
                 etcd.get("foo")
             assert etcd.endpoint_in_use.is_failed()
 
@@ -1002,10 +1002,10 @@ class TestPyEtcd(object):
         exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.Etcd3Client.kvstub',
+        with mock.patch('pyetcd3.Etcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
-            with pytest.raises(pyetcd.exceptions.ConnectionTimeoutError):
+            with pytest.raises(pyetcd3.exceptions.ConnectionTimeoutError):
                 etcd.get("foo")
             assert etcd.endpoint_in_use.is_failed()
 
@@ -1014,19 +1014,19 @@ class TestPyEtcd(object):
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.Etcd3Client.kvstub',
+        with mock.patch('pyetcd3.Etcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
-            with pytest.raises(pyetcd.exceptions.ConnectionFailedError):
+            with pytest.raises(pyetcd3.exceptions.ConnectionFailedError):
                 etcd.get("foo")
-        with pytest.raises(pyetcd.exceptions.NoServerAvailableError):
+        with pytest.raises(pyetcd3.exceptions.NoServerAvailableError):
             etcd.get("foo")
 
     def test_grpc_exception_on_unknown_code(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('pyetcd.Etcd3Client.kvstub',
+        with mock.patch('pyetcd3.Etcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
             with pytest.raises(grpc.RpcError):
@@ -1036,7 +1036,7 @@ class TestPyEtcd(object):
     def test_status_member(self, etcd):
         status = etcd.status()
 
-        assert isinstance(status.leader, pyetcd.members.Member) is True
+        assert isinstance(status.leader, pyetcd3.members.Member) is True
         assert status.leader.id in [m.id for m in etcd.members]
 
     def test_hash(self, etcd):

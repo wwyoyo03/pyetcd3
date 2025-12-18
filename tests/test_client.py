@@ -2,9 +2,9 @@ import os
 import pytest
 import mock
 import subprocess
-import pyetcd
+import pyetcd3
 import grpc
-from pyetcd import etcdrpc
+from pyetcd3 import etcdrpc
 
 def etcdctl(*args):
     endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
@@ -18,7 +18,7 @@ def etcdctl(*args):
 class TestClient:
     @pytest.fixture
     def etcd(self):
-        yield pyetcd.client()
+        yield pyetcd3.client()
 
     def test_sort_target(self, etcd):
         key = 'key'.encode('utf-8')
@@ -54,7 +54,7 @@ class TestClient:
             etcd._build_get_range_request(key, sort_order='feelsbadman')
 
     def test_secure_channel(self):
-        client = pyetcd.client(
+        client = pyetcd3.client(
             ca_cert="tests/ca.crt",
             cert_key="tests/client.key",
             cert_cert="tests/client.crt"
@@ -62,7 +62,7 @@ class TestClient:
         assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_only(self):
-        client = pyetcd.client(
+        client = pyetcd3.client(
             ca_cert="tests/ca.crt",
             cert_key=None,
             cert_cert=None
@@ -71,13 +71,13 @@ class TestClient:
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self):
         with pytest.raises(ValueError):
-            pyetcd.client(
+            pyetcd3.client(
                 ca_cert='tests/ca.crt',
                 cert_key='tests/client.crt',
                 cert_cert=None)
 
         with pytest.raises(ValueError):
-            pyetcd.client(
+            pyetcd3.client(
                 ca_cert='tests/ca.crt',
                 cert_key=None,
                 cert_cert='tests/client.crt')
@@ -87,14 +87,14 @@ class TestClient:
             etcd.compact(10000)
 
     def test_channel_with_no_cert(self):
-        client = pyetcd.client(
+        client = pyetcd3.client(
             ca_cert=None,
             cert_key=None,
             cert_cert=None
         )
         assert client.uses_secure_channel is False
 
-    @mock.patch('pyetcd.etcdrpc.AuthStub')
+    @mock.patch('pyetcd3.etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
@@ -102,7 +102,7 @@ class TestClient:
         self._enable_auth_in_etcd()
 
         # Create a client using username and password auth
-        client = pyetcd.client(
+        client = pyetcd3.client(
             user='root',
             password='pwd'
         )
@@ -112,10 +112,10 @@ class TestClient:
 
     def test_user_or_pwd_auth_raises_exception(self):
         with pytest.raises(Exception):
-            pyetcd.client(user='usr')
+            pyetcd3.client(user='usr')
 
         with pytest.raises(Exception):
-            pyetcd.client(password='pwd')
+            pyetcd3.client(password='pwd')
 
     def _enable_auth_in_etcd(self):
         etcdctl(*['user', 'add', 'root:pwd'])

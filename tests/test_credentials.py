@@ -1,5 +1,5 @@
 import mock
-from pyetcd.client import EtcdTokenCallCredentials
+from pyetcd3.client import EtcdTokenCallCredentials
 
 class TestEtcdTokenCallCredentials(object):
     def test_token_callback(self):

@@ -1,10 +1,10 @@
-import pyetcd
-from pyetcd import etcdrpc
+import pyetcd3
+from pyetcd3 import etcdrpc
 class TestCompares:
 
     def test_compare_version(self):
         key = 'key'
-        tx = pyetcd.Transactions()
+        tx = pyetcd3.Transactions()
 
         version_compare = tx.version(key) == 1
         assert version_compare.op == etcdrpc.Compare.EQUAL
@@ -22,7 +22,7 @@ class TestCompares:
 
     def test_compare_value(self):
         key = 'key'
-        tx = pyetcd.Transactions()
+        tx = pyetcd3.Transactions()
 
         value_compare = tx.value(key) == 'b'
         assert value_compare.op == etcdrpc.Compare.EQUAL
@@ -39,7 +39,7 @@ class TestCompares:
 
     def test_compare_mod(self):
         key = 'key'
-        tx = pyetcd.Transactions()
+        tx = pyetcd3.Transactions()
 
         mod_compare = tx.mod(key) == -100
         assert mod_compare.op == etcdrpc.Compare.EQUAL
@@ -56,7 +56,7 @@ class TestCompares:
 
     def test_compare_create(self):
         key = 'key'
-        tx = pyetcd.Transactions()
+        tx = pyetcd3.Transactions()
 
         create_compare = tx.create(key) == 10
         assert create_compare.op == etcdrpc.Compare.EQUAL

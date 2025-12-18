@@ -1,4 +1,4 @@
-Welcome to pyetcd's documentation!
+Welcome to pyetcd3's documentation!
 ========================================
 
 Overview

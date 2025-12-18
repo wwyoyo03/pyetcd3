@@ -185,16 +185,13 @@ class MultiEndpointEtcd3Client(object):
         self.call_credentials = None
         cred_params = [c is not None for c in (user, password)]
 
+        self.user = user
+        self.password = password
+        self.max_reauth_count = len(endpoints) + 1  # max try count add 1
+        # counter, avoid infinite recursion when unauthorized error
+        self._refresh_token_count = 0
         if all(cred_params):
-            auth_request = etcdrpc.AuthenticateRequest(
-                name=user,
-                password=password
-            )
-
-            resp = self.authstub.Authenticate(auth_request, self.timeout)
-            self.metadata = (('token', resp.token),)
-            self.call_credentials = grpc.metadata_call_credentials(
-                EtcdTokenCallCredentials(resp.token))
+            self._auth_request()
 
         elif any(cred_params):
             raise Exception(
@@ -203,6 +200,17 @@ class MultiEndpointEtcd3Client(object):
             )
 
         self.transactions = Transactions()
+
+    def _auth_request(self):
+        auth_request = etcdrpc.AuthenticateRequest(
+                name=self.user,
+                password=self.password
+            )
+
+        resp = self.authstub.Authenticate(auth_request, self.timeout)
+        self.metadata = (('token', resp.token),)
+        self.call_credentials = grpc.metadata_call_credentials(
+            EtcdTokenCallCredentials(resp.token))    
 
     def _create_stub_property(name, stub_class):
         def get_stub(self):
@@ -321,6 +329,12 @@ class MultiEndpointEtcd3Client(object):
             cert_key_file,
             cert_cert_file
         )
+    
+    def _raise_error(self, code):
+        exception = _EXCEPTIONS_BY_CODE.get(code)
+        if exception is None:
+            raise
+        raise exception()    
 
     def _manage_grpc_errors(self, exc):
         code = exc.code()
@@ -330,10 +344,31 @@ class MultiEndpointEtcd3Client(object):
             # subsequent requests.
             self.endpoint_in_use.fail()
             self._clear_old_stubs()
-        exception = _EXCEPTIONS_BY_CODE.get(code)
-        if exception is None:
-            raise
-        raise exception()
+        self._raise_error(code)
+
+    def _try_refresh_token_when_unauthorized(self, exc):
+        code = exc.code()
+        if self._refresh_token_count > self.max_reauth_count:
+            # max try
+            self._raise_error(code)
+
+        if code != grpc.StatusCode.UNAUTHENTICATED:
+            # double check
+            self._raise_error(code)
+
+        for _ in range(self.max_reauth_count):
+            try:
+                self._auth_request()
+                break  # refresh token success
+            except grpc.RpcError as exc:
+                if exc == grpc.StatusCode.UNAUTHENTICATED:
+                    continue
+                self._raise_error(exc.code())
+            finally:
+                self._refresh_token_count += 1
+        
+        # reset count
+        self._refresh_token_count = 0        
 
     def _handle_errors(payload):
         @functools.wraps(payload)
@@ -341,6 +376,9 @@ class MultiEndpointEtcd3Client(object):
             try:
                 return payload(self, *args, **kwargs)
             except grpc.RpcError as exc:
+                if exc.code() == grpc.StatusCode.UNAUTHENTICATED:
+                    self._try_refresh_token_when_unauthorized(exc)
+                    return payload(self, *args, **kwargs)
                 self._manage_grpc_errors(exc)
         return handler
 
@@ -351,6 +389,10 @@ class MultiEndpointEtcd3Client(object):
                 for item in payload(self, *args, **kwargs):
                     yield item
             except grpc.RpcError as exc:
+                if exc.code() == grpc.StatusCode.UNAUTHENTICATED:
+                    self._try_refresh_token_when_unauthorized(exc)
+                    for item in payload(self, *args, **kwargs):
+                        yield item
                 self._manage_grpc_errors(exc)
         return handler
 

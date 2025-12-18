@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (C) 2023 XuanYang-cn. All rights reserved.
+#  Copyright (C) 2023 wwyoyo03. All rights reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-OUTDIR="pyetcd/etcdrpc"
-PROTO_DIR="pyetcd/proto"
+OUTDIR="pyetcd3/etcdrpc"
+PROTO_DIR="pyetcd3/proto"
 
 python -m grpc_tools.protoc -I ${PROTO_DIR} --python_out=${OUTDIR} --pyi_out=${OUTDIR} ${PROTO_DIR}/auth.proto
 python -m grpc_tools.protoc -I ${PROTO_DIR} --python_out=${OUTDIR} --pyi_out=${OUTDIR} ${PROTO_DIR}/kv.proto

@@ -17,9 +17,9 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyetcd'
-copyright = '2023, XuanYang-cn'
-author = 'XuanYang-cn'
+project = 'pyetcd3'
+copyright = '2025, wwyoyo03'
+author = 'wwyoyo03'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'

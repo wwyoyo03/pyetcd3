@@ -1,44 +1,31 @@
-# pyetcd
+# pyetcd3
 
-[![version](https://img.shields.io/pypi/v/etcd-sdk-python.svg?color=blue)](https://pypi.org/project/etcd-sdk-python/)
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/etcd-sdk-python?logo=python&logoColor=blue)](https://pypi.org/project/etcd-sdk-python/)
-[![Downloads](https://pepy.tech/badge/etcd-sdk-python)](https://pepy.tech/project/etcd-sdk-python)
-[![Downloads](https://pepy.tech/badge/etcd-sdk-python/month)](https://pepy.tech/project/etcd-sdk-python/month)
-[![license](https://img.shields.io/hexpm/l/plug.svg?color=green)](https://github.com/xuanyang-cn/pyetcd/blob/main/LICENSE)
+[![version](https://img.shields.io/pypi/v/pyetcd3-sdk.svg?color=blue)](https://pypi.org/project/pyetcd3-sdk/)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/pyetcd3-sdk?logo=python&logoColor=blue)](https://pypi.org/project/pyetcd3-sdk/)
+[![Downloads](https://pepy.tech/badge/pyetcd3-sdk)](https://pepy.tech/project/pyetcd3-sdk)
+[![Downloads](https://pepy.tech/badge/pyetcd3-sdk/month)](https://pepy.tech/project/pyetcd3-sdk/month)
+[![license](https://img.shields.io/hexpm/l/plug.svg?color=green)](https://github.com/wwyoyo03/pyetcd3/blob/main/LICENSE)
 
 Python client for the etcd API v3, supported python >= 3.7, under active maintenance
 
 ## Install
 ```shell
-pip install etcd-sdk-python
+pip install pyetcd3-sdk
 ```
-## Road maps and TODOs
+## Differences from python-etcd3 and pyetcd
+This package is a maintained fork of pyetcd with the following key improvements:
 
-### Road maps
-|version|release date|target|status|
-|:-----:|:----------:|------|:----:|
-|0.0.1  |Apr 10,2023 |enable >= python3.7|DONE  |
-|0.0.2  |Jun 6,2023 ||DONE|
-|0.0.3  |ND |set up github actions, run pass unittests, set up merging rules, ensure quality|WIP|
-
-
-### TODOs for v0.0.2
-|functions|version|status|
-|---------|:-----:|:----:|
-|make ut work|0.0.2|BACKLOG|
-|make tox.ini work|0.0.2|BACKLOG|
-|enable running ut for pull requests|0.0.2|BACKLOG|
-|enable running lint for pull requests|0.0.2|BACKLOG|
-|enable publishing dev packages for merge|0.0.2|BACKLOG|
-|Add mergify to help merging PRs|0.0.2|BACKLOG|
+- Updated grpcio version and support for etcd authentication (username/password).
+- Automatic token refresh to maintain authenticated sessions without manual reconnection.
+These enhancements make pyetcd3-sdk more suitable for production environments that require secure, long-running connections to etcd clusters.
 
 
 ## Basic usage:
 
 ```python
-import pyetcd
+import pyetcd3
 
-etcd = pyetcd.client()
+etcd = pyetcd3.client()
 
 etcd.get('foo')
 etcd.put('bar', 'doot')
@@ -106,4 +93,4 @@ etcd.cancel_watch(watch_id)
 
 ## Credits
 
-Many thx to  [python-etcd3](https://github.com/kragniz/python-etcd3)
+Many thx to  [python-etcd3](https://github.com/kragniz/python-etcd3) and [pyetcd](https://github.com/XuanYang-cn/pyetcd)

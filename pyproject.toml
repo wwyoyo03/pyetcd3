@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 XuanYang-cn. All rights reserved.
+#  Copyright (C) 2023 wwyoyo03. All rights reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ requires = ["setuptools>=67.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "etcd-sdk-python"
+name = "pyetcd3-sdk"
 authors = [
-  { name="XuanYang-cn", email="jumpthepig@gmail.com" },
+  { name="wwyoyo03", email="wwyoyo03@gmail.com" },
 ]
 description = "Python client for the etcd v3 API for python >= 3.7"
 readme = "README.md"
@@ -30,7 +30,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies    = [
-    "grpcio>=1.49.1,<=1.58.0",
+    "grpcio>=1.41.0,<=1.43.0",
 ]
 
 dynamic = ["version"]
@@ -40,6 +40,6 @@ dynamic = ["version"]
 'version_scheme'= 'no-guess-dev'
 
 [project.urls]
-"Homepage"          = "https://github.com/XuanYang-cn/pyetcd"
-"Docs: User Guide"  = "https://pyetcd-docs.readthedocs.io/en/latest/"
-"Source Code"       = "https://github.com/XuanYang-cn/pyetcd"
+"Homepage"          = "https://github.com/wwyoyo03/pyetcd3"
+"Docs: User Guide"  = "https://pyetcd3-docs.readthedocs.io/en/latest/"
+"Source Code"       = "https://github.com/wwyoyo03/pyetcd3"
