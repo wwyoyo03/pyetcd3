@@ -17,6 +17,7 @@ This package is a maintained fork of pyetcd with the following key improvements:
 
 - Updated grpcio version and support for etcd authentication (username/password).
 - Automatic token refresh to maintain authenticated sessions without manual reconnection.
+
 These enhancements make pyetcd3-sdk more suitable for production environments that require secure, long-running connections to etcd clusters.
 
 
