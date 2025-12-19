@@ -188,11 +188,9 @@ class MultiEndpointEtcd3Client(object):
         self.user = user
         self.password = password
         self.max_reauth_count = len(endpoints) + 1  # max try count add 1
-        # counter, avoid infinite recursion when unauthorized error
-        self._refresh_token_count = 0
         if all(cred_params):
-            self._auth_request()
-
+            # lock execution
+            functools.partial(self._auth_request, "auth_request", self)()
         elif any(cred_params):
             raise Exception(
                 'if using authentication credentials both user and password '
@@ -201,6 +199,7 @@ class MultiEndpointEtcd3Client(object):
 
         self.transactions = Transactions()
 
+    @utils.refresh_token_sf.wrap
     def _auth_request(self):
         auth_request = etcdrpc.AuthenticateRequest(
                 name=self.user,
@@ -348,27 +347,24 @@ class MultiEndpointEtcd3Client(object):
 
     def _try_refresh_token_when_unauthorized(self, exc):
         code = exc.code()
-        if self._refresh_token_count > self.max_reauth_count:
-            # max try
-            self._raise_error(code)
-
         if code != grpc.StatusCode.UNAUTHENTICATED:
             # double check
             self._raise_error(code)
 
+        last_exc = None
         for _ in range(self.max_reauth_count):
             try:
-                self._auth_request()
-                break  # refresh token success
+                # lock execution
+                functools.partial(self._auth_request, "auth_request", self)()
+                self.status()  # verfiy
+                return  # refresh token success
             except grpc.RpcError as exc:
-                if exc == grpc.StatusCode.UNAUTHENTICATED:
+                last_exc = exc
+                if exc.code() == grpc.StatusCode.UNAUTHENTICATED:
                     continue
                 self._raise_error(exc.code())
-            finally:
-                self._refresh_token_count += 1
-        
-        # reset count
-        self._refresh_token_count = 0        
+
+            self._manage_grpc_errors(last_exc)
 
     def _handle_errors(payload):
         @functools.wraps(payload)
