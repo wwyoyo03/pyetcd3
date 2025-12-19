@@ -41,7 +41,7 @@ dynamic = ["version"]
 
 [project.urls]
 "Homepage"          = "https://github.com/wwyoyo03/pyetcd3"
-"Docs: User Guide"  = "https://pyetcd3-docs.readthedocs.io/en/latest/"
+"Docs: User Guide"  = "https://pyetcd3-doc.readthedocs.io/en/latest/"
 "Source Code"       = "https://github.com/wwyoyo03/pyetcd3"
 
 
