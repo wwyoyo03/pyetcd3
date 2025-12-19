@@ -18,6 +18,7 @@ grpcio-tools
 
 
 Sphinx>=5.3.0
+protobuf==4.25.8
 sphinx-copybutton
 sphinx-rtd-theme
 sphinx-copybutton==0.5.2

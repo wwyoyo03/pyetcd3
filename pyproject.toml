@@ -31,6 +31,7 @@ classifiers = [
 ]
 dependencies    = [
     "grpcio>=1.41.0,<=1.43.0",
+    "protobuf>=4.25.8",
 ]
 
 dynamic = ["version"]
@@ -43,7 +44,6 @@ dynamic = ["version"]
 "Homepage"          = "https://github.com/wwyoyo03/pyetcd3"
 "Docs: User Guide"  = "https://pyetcd3-doc.readthedocs.io/en/latest/"
 "Source Code"       = "https://github.com/wwyoyo03/pyetcd3"
-
 
 [project.optional-dependencies]
 docs = [

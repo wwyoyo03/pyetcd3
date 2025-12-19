@@ -1,4 +1,5 @@
 sphinx==7.4.7
+protobuf==4.25.8
 sphinx-copybutton==0.5.2
 myst-parser==3.0.1
 sphinxcontrib-applehelp==2.0.0
